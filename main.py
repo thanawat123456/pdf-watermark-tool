@@ -87,48 +87,53 @@ def get_excel_sheets(uploaded_file):
     except:
         return []
 
+
 def create_watermark_overlay(name, page_width, page_height):
-    """สร้างลายน้ำสำหรับชื่อหนึ่งคน"""
+    """สร้างลายน้ำสำหรับชื่อหนึ่งคน - แบบทแยงมุม 9 จุดตามตำแหน่งใหม่"""
     packet = io.BytesIO()
     can = canvas.Canvas(packet, pagesize=(page_width, page_height))
     
     # ตั้งค่าลายน้ำ
     if FONT_AVAILABLE:
-        can.setFont("THSarabunNew", 70)
+        can.setFont("THSarabunNew", 45)  # ลดขนาดลงมาจาก 60
     else:
-        can.setFont("Helvetica", 50)
+        can.setFont("Helvetica", 30)      # ลดขนาดลงมาจาก 40
     
-    can.setFillColorRGB(0.6, 0.6, 0.6, alpha=0.4)
+    can.setFillColorRGB(0.6, 0.6, 0.6, alpha=0.20)  # ลดความเข้มเล็กน้อย
     
-    # กำหนดตำแหน่งกระจายทั่วหน้า
+    # กำหนดตำแหน่ง 9 จุดตามรูปแบบใหม่ (ตำแหน่งเฉพาะ)
     positions = [
-        (page_width * 0.2, page_height * 0.8),   # ซ้ายบน
-        (page_width * 0.8, page_height * 0.8),   # ขวาบน
-        (page_width * 0.15, page_height * 0.6),  # ซ้ายกลาง
-        (page_width * 0.85, page_height * 0.6),  # ขวากลาง
-        (page_width * 0.3, page_height * 0.4),   # ซ้ายล่าง
-        (page_width * 0.7, page_height * 0.4),   # ขวาล่าง
-        (page_width * 0.5, page_height * 0.2),   # กลางล่าง
-        (page_width * 0.1, page_height * 0.3),   # ซ้ายล่างสุด
-        (page_width * 0.9, page_height * 0.3),   # ขวาล่างสุด
-        (page_width * 0.5, page_height * 0.5),   # กลางกลาง
+        # แถวบนซ้าย-บน-บนขวา
+        (page_width * 0.15, page_height * 0.85),  # บนซ้าย
+        (page_width * 0.5, page_height * 0.9),    # บนกลาง (สูงขึ้น)
+        (page_width * 0.85, page_height * 0.85),  # บนขวา
+        
+        # แถวกลางซ้าย-กลาง-กลางขวา
+        (page_width * 0.1, page_height * 0.55),   # กลางซ้าย (ซ้ายมาก)
+        (page_width * 0.5, page_height * 0.5),    # กลางกลาง
+        (page_width * 0.9, page_height * 0.55),   # กลางขวา (ขวามาก)
+        
+        # แถวล่างซ้าย-ล่าง-ล่างขวา
+        (page_width * 0.15, page_height * 0.2),   # ล่างซ้าย
+        (page_width * 0.5, page_height * 0.15),   # ล่างกลาง (ต่ำลง)
+        (page_width * 0.85, page_height * 0.2),   # ล่างขวา
     ]
     
-    # วางชื่อในหลายตำแหน่ง
+    # วางลายน้ำใน 9 ตำแหน่งตามรูปแบบใหม่
     for i, (x, y) in enumerate(positions):
         can.saveState()
         can.translate(x, y)
         
-        # หมุนในมุมที่ต่างกัน
-        rotation_angle = 30 + (i * 20) % 60
+        # หมุนตามแนวทแยงมุม (+45 องศา สำหรับทุกตำแหน่ง)
+        rotation_angle = 45
         can.rotate(rotation_angle)
         
         # คำนวณความกว้างข้อความ
         font_name = "THSarabunNew" if FONT_AVAILABLE else "Helvetica"
-        font_size = 70 if FONT_AVAILABLE else 50
+        font_size = 45 if FONT_AVAILABLE else 30
         text_width = can.stringWidth(name, font_name, font_size)
         
-        # วาดข้อความ
+        # วาดข้อความ (จัดกึ่งกลาง)
         can.drawString(-text_width / 2, 0, name)
         can.restoreState()
     
